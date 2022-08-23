@@ -89,7 +89,7 @@ def main() -> None:
         if char.isalpha():
             wip += char.lower()
         elif char == "\n":
-            if required_letter in wip and wip in valid_words:
+            if required_letter in wip and wip in valid_words and wip not in words_found:
                 words_found.append(wip)
                 words_found.sort()
                 score += 1 if len(wip) == MIN_WORD_LENGTH else len(wip)
