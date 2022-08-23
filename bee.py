@@ -57,6 +57,12 @@ def main() -> None:
     wip: str = ""
     score: int = 0
     while True:
+        stdscr.clear()
+        maxy, maxx = stdscr.getmaxyx()
+        stdscr.addstr(maxy // 2, (maxx - len(wip)) // 2, wip)
+        stdscr.addstr(0, 0, " ".join(words_found))
+        stdscr.addstr(maxy - 1, 0, str(score))
+
         char: str = stdscr.getkey()
 
         if char.isalpha():
@@ -71,12 +77,6 @@ def main() -> None:
             wip = ""
         elif char == '\x7f':
             wip = wip[:-1]
-
-        stdscr.clear()
-        maxy, maxx = stdscr.getmaxyx()
-        stdscr.addstr(maxy // 2, (maxx - len(wip)) // 2, wip)
-        stdscr.addstr(0, 0, " ".join(words_found))
-        stdscr.addstr(maxy - 1, 0, str(score))
 
 if __name__ == "__main__":
     main()
