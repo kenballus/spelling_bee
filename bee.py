@@ -21,7 +21,7 @@ def error_out(error_message: str) -> None:
 
 def check_for_errors(pangram: str, required_letter: str) -> None:
     if not WORD_LIST_PATH.is_file():
-        error_out(f"Cannot find a word list at {WORD_LIST_PATH_STR}.")
+        error_out(f"No word list found at {WORD_LIST_PATH_STR}.")
 
     if len(required_letter) != 1:
         error_out("The required letter is more than one character.")
@@ -114,6 +114,8 @@ def main() -> None:
             # Exit instruction (bottom right)
             stdscr.addstr(maxy - 1, maxx - 1 - len(EXIT_INSTRUCTION), EXIT_INSTRUCTION)
 
+        # Actually get a key.
+        # This is a blocking action.
         char: str = stdscr.getkey().lower()
 
         if char.isalpha():
