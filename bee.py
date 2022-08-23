@@ -9,9 +9,11 @@ MIN_WORD_LENGTH: int = 4
 WORD_LIST_PATH_STR: str = "/usr/share/dict/american-english"
 WORD_LIST_PATH: pathlib.PosixPath = pathlib.PosixPath(WORD_LIST_PATH_STR)
 
+
 def error_out(error_message: str) -> None:
     print(f"Error: {error_message}", file=sys.stderr)
     sys.exit(1)
+
 
 def check_for_errors(pangram: str, required_letter: str) -> None:
     if not WORD_LIST_PATH.is_file():
@@ -29,10 +31,13 @@ def check_for_errors(pangram: str, required_letter: str) -> None:
     if required_letter not in pangram:
         error_out("The required letter is not in the pangram.")
 
+
 def main() -> None:
-    parser: argparse.ArgumentParser = argparse.ArgumentParser(description='Clone of NYTimes Spelling Bee')
-    parser.add_argument('--pangram', required=True)
-    parser.add_argument('--required_letter', metavar="CHARACTER", required=True)
+    parser: argparse.ArgumentParser = argparse.ArgumentParser(
+        description="Clone of NYTimes Spelling Bee"
+    )
+    parser.add_argument("--pangram", required=True)
+    parser.add_argument("--required_letter", metavar="LETTER", required=True)
 
     args: argparse.Namespace = parser.parse_args()
 
@@ -43,9 +48,14 @@ def main() -> None:
 
     with open("/usr/share/dict/american-english") as word_file:
         # Filter out all the words with symbols and uppercase letters, then save them
-        valid_words: Set[str] = set(filter(lambda w: w.islower() and MIN_WORD_LENGTH <= len(w) <= MAX_WORD_LENGTH and set(w).issubset(set(pangram)),
-                                           map(str.strip,
-                                               word_file.readlines())))
+        valid_words: Set[str] = set(
+            filter(
+                lambda w: w.islower()
+                and MIN_WORD_LENGTH <= len(w) <= MAX_WORD_LENGTH
+                and set(w).issubset(set(pangram)),
+                map(str.strip, word_file.readlines()),
+            )
+        )
 
     # If you really want a fake word, I'm cool with it.
     valid_words.add(pangram)
@@ -67,16 +77,17 @@ def main() -> None:
 
         if char.isalpha():
             wip += char.lower()
-        elif char == '\n':
+        elif char == "\n":
             if wip in valid_words:
                 words_found.add(wip)
-                score += (1 if len(wip) == MIN_WORD_LENGTH else len(wip))
+                score += 1 if len(wip) == MIN_WORD_LENGTH else len(wip)
                 if set(wip) == set(pangram):
                     score += 7
 
             wip = ""
-        elif char == '\x7f':
+        elif char == "\x7f":
             wip = wip[:-1]
+
 
 if __name__ == "__main__":
     main()
