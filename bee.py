@@ -32,6 +32,7 @@ def check_for_errors(pangram: str, required_letter: str) -> None:
     if required_letter not in pangram:
         error_out("The required letter is not in the pangram.")
 
+
 def main() -> None:
     parser: argparse.ArgumentParser = argparse.ArgumentParser(
         description="Clone of NYTimes Spelling Bee"
@@ -76,18 +77,38 @@ def main() -> None:
     required_letter_index: int = letter_arrangement.index(required_letter)
 
     while True:
-        stdscr.clear()
         maxy, maxx = stdscr.getmaxyx()
-        stdscr.addstr(maxy // 2, (maxx - len(wip)) // 2, wip)
-        stdscr.addstr(0, 0, " ".join(words_found))
-        stdscr.addstr(maxy - 1, 0, f"score: {score}")
-        stdscr.addstr(maxy // 2 - 1, (maxx - len(letter_arrangement)) // 2, letter_arrangement[:required_letter_index])
-        stdscr.addstr(maxy // 2 - 1, (maxx - len(letter_arrangement)) // 2 + required_letter_index, required_letter, curses.A_BOLD | curses.A_UNDERLINE)
-        stdscr.addstr(maxy // 2 - 1, (maxx - len(letter_arrangement)) // 2 + required_letter_index + 1, letter_arrangement[required_letter_index + 1:])
-        char: str = stdscr.getkey()
+        stdscr.clear()
+
+        if maxx < MAX_WORD_LENGTH:
+            stdscr.addstr(0, 0, "Terminal too small!")
+        else:
+            stdscr.addstr(maxy // 2, (maxx - len(wip)) // 2, wip)
+            stdscr.addstr(0, 0, " ".join(words_found))
+            stdscr.addstr(maxy - 1, 0, f"score: {score}")
+            stdscr.addstr(
+                maxy // 2 - 1,
+                (maxx - len(letter_arrangement)) // 2,
+                letter_arrangement[:required_letter_index],
+            )
+            stdscr.addstr(
+                maxy // 2 - 1,
+                (maxx - len(letter_arrangement)) // 2 + required_letter_index,
+                required_letter,
+                curses.A_BOLD | curses.A_UNDERLINE,
+            )
+            stdscr.addstr(
+                maxy // 2 - 1,
+                (maxx - len(letter_arrangement)) // 2 + required_letter_index + 1,
+                letter_arrangement[required_letter_index + 1 :],
+            )
+
+        char: str = stdscr.getkey().lower()
 
         if char.isalpha():
-            wip += char.lower()
+            wip += char
+            if len(wip) > MAX_WORD_LENGTH:
+                wip = ""
         elif char == "\n":
             if required_letter in wip and wip in valid_words and wip not in words_found:
                 words_found.append(wip)
