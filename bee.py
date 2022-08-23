@@ -9,11 +9,11 @@ MIN_WORD_LENGTH: int = 4
 WORD_LIST_PATH_STR: str = "/usr/share/dict/american-english"
 WORD_LIST_PATH: pathlib.PosixPath = pathlib.PosixPath(WORD_LIST_PATH_STR)
 
-def error_out(error_message: str):
+def error_out(error_message: str) -> None:
     print(f"Error: {error_message}", file=sys.stderr)
     sys.exit(1)
 
-def validate_args(pangram: str, required_letter: str) -> None:
+def check_for_errors(pangram: str, required_letter: str) -> None:
     if not WORD_LIST_PATH.is_file():
         error_out(f"Cannot find a word list at {WORD_LIST_PATH_STR}.")
 
@@ -39,7 +39,7 @@ def main() -> None:
     pangram: str = args.pangram.lower()
     required_letter: str = args.required_letter.lower()
 
-    validate_args(pangram, required_letter)
+    check_for_errors(pangram, required_letter)
 
     with open("/usr/share/dict/american-english") as word_file:
         # Filter out all the words with symbols and uppercase letters, then save them
