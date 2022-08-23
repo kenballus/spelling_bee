@@ -4,6 +4,7 @@ import argparse
 import locale
 import pathlib
 import random
+from typing import Set, List
 
 MAX_WORD_LENGTH: int = 30
 MIN_WORD_LENGTH: int = 4
@@ -131,7 +132,7 @@ def main() -> None:
             l: List[str] = list(letter_arrangement)
             random.shuffle(l)
             letter_arrangement = "".join(l)
-            required_letter_index: int = letter_arrangement.index(required_letter)
+            required_letter_index = letter_arrangement.index(required_letter)
         elif char == "\x7f":  # Backspace
             wip = wip[:-1]
         elif char == "\x04":  # Ctrl-D
