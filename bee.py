@@ -10,6 +10,8 @@ MIN_WORD_LENGTH: int = 4
 WORD_LIST_PATH_STR: str = "/usr/share/dict/american-english"
 WORD_LIST_PATH: pathlib.PosixPath = pathlib.PosixPath(WORD_LIST_PATH_STR)
 
+EXIT_INSTRUCTION: str = "(press ctrl-d to exit)"
+
 
 def error_out(error_message: str) -> None:
     print(f"Error: {error_message}", file=sys.stderr)
@@ -80,16 +82,21 @@ def main() -> None:
         maxy, maxx = stdscr.getmaxyx()
         stdscr.clear()
 
-        if maxx < MAX_WORD_LENGTH:
+        if maxx <= MAX_WORD_LENGTH:
             stdscr.addstr(0, 0, "Terminal too small!")
         else:
+            # Word in progress (middle)
             stdscr.addstr(maxy // 2, (maxx - len(wip)) // 2, wip)
+            # Words found (top)
             stdscr.addstr(0, 0, " ".join(words_found))
+            # Score (bottom left)
             stdscr.addstr(maxy - 1, 0, f"score: {score}")
+            # Available letters (just above middle)
             stdscr.addstr(
                 maxy // 2 - 1,
                 (maxx - len(letter_arrangement)) // 2,
                 letter_arrangement[:required_letter_index],
+                curses.A_BOLD,
             )
             stdscr.addstr(
                 maxy // 2 - 1,
@@ -101,7 +108,10 @@ def main() -> None:
                 maxy // 2 - 1,
                 (maxx - len(letter_arrangement)) // 2 + required_letter_index + 1,
                 letter_arrangement[required_letter_index + 1 :],
+                curses.A_BOLD,
             )
+            # Exit instruction (bottom right)
+            stdscr.addstr(maxy - 1, maxx - 1 - len(EXIT_INSTRUCTION), EXIT_INSTRUCTION)
 
         char: str = stdscr.getkey().lower()
 
@@ -122,8 +132,13 @@ def main() -> None:
             random.shuffle(l)
             letter_arrangement = "".join(l)
             required_letter_index: int = letter_arrangement.index(required_letter)
-        elif char == "\x7f":
+        elif char == "\x7f":  # Backspace
             wip = wip[:-1]
+        elif char == "\x04":  # Ctrl-D
+            break
+
+    curses.echo()
+    curses.endwin()
 
 
 if __name__ == "__main__":
