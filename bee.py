@@ -3,6 +3,7 @@ import sys
 import argparse
 import locale
 import pathlib
+import random
 
 MAX_WORD_LENGTH: int = 30
 MIN_WORD_LENGTH: int = 4
@@ -31,7 +32,6 @@ def check_for_errors(pangram: str, required_letter: str) -> None:
     if required_letter not in pangram:
         error_out("The required letter is not in the pangram.")
 
-
 def main() -> None:
     parser: argparse.ArgumentParser = argparse.ArgumentParser(
         description="Clone of NYTimes Spelling Bee"
@@ -44,7 +44,10 @@ def main() -> None:
     pangram: str = args.pangram.lower()
     required_letter: str = args.required_letter.lower()
 
+    # This may exit the program
     check_for_errors(pangram, required_letter)
+
+    valid_letters: Set[str] = set(pangram)
 
     with open("/usr/share/dict/american-english") as word_file:
         # Filter out all the words with symbols and uppercase letters, then save them
@@ -52,7 +55,8 @@ def main() -> None:
             filter(
                 lambda w: w.islower()
                 and MIN_WORD_LENGTH <= len(w) <= MAX_WORD_LENGTH
-                and set(w).issubset(set(pangram)),
+                and required_letter in w
+                and set(w).issubset(valid_letters),
                 map(str.strip, word_file.readlines()),
             )
         )
@@ -62,29 +66,40 @@ def main() -> None:
 
     stdscr = curses.initscr()
     curses.noecho()
+    curses.curs_set(False)
 
     words_found = set()
     wip: str = ""
     score: int = 0
+
+    letter_arrangement: str = "".join(valid_letters)
+    required_letter_index: int = letter_arrangement.index(required_letter)
+
     while True:
         stdscr.clear()
         maxy, maxx = stdscr.getmaxyx()
         stdscr.addstr(maxy // 2, (maxx - len(wip)) // 2, wip)
         stdscr.addstr(0, 0, " ".join(words_found))
-        stdscr.addstr(maxy - 1, 0, str(score))
-
+        stdscr.addstr(maxy - 1, 0, f"score: {score}")
+        stdscr.addstr(maxy // 2 - 1, (maxx - len(letter_arrangement)) // 2, letter_arrangement[:required_letter_index])
+        stdscr.addstr(maxy // 2 - 1, (maxx - len(letter_arrangement)) // 2 + required_letter_index, required_letter, curses.A_BOLD | curses.A_UNDERLINE)
+        stdscr.addstr(maxy // 2 - 1, (maxx - len(letter_arrangement)) // 2 + required_letter_index + 1, letter_arrangement[required_letter_index + 1:])
         char: str = stdscr.getkey()
 
         if char.isalpha():
             wip += char.lower()
         elif char == "\n":
-            if wip in valid_words:
+            if required_letter in wip and wip in valid_words:
                 words_found.add(wip)
                 score += 1 if len(wip) == MIN_WORD_LENGTH else len(wip)
                 if set(wip) == set(pangram):
                     score += 7
-
             wip = ""
+        elif char == " ":
+            l: List[str] = list(letter_arrangement)
+            random.shuffle(l)
+            letter_arrangement = "".join(l)
+            required_letter_index: int = letter_arrangement.index(required_letter)
         elif char == "\x7f":
             wip = wip[:-1]
 
