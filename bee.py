@@ -68,7 +68,7 @@ def main() -> None:
     curses.noecho()
     curses.curs_set(False)
 
-    words_found = set()
+    words_found: List[str] = []
     wip: str = ""
     score: int = 0
 
@@ -90,7 +90,8 @@ def main() -> None:
             wip += char.lower()
         elif char == "\n":
             if required_letter in wip and wip in valid_words:
-                words_found.add(wip)
+                words_found.append(wip)
+                words_found.sort()
                 score += 1 if len(wip) == MIN_WORD_LENGTH else len(wip)
                 if set(wip) == set(pangram):
                     score += 7
