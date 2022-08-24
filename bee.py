@@ -11,8 +11,6 @@ MIN_WORD_LENGTH: int = 4
 WORD_LIST_PATH_STR: str = "/usr/share/dict/american-english"
 WORD_LIST_PATH: pathlib.PosixPath = pathlib.PosixPath(WORD_LIST_PATH_STR)
 
-EXIT_INSTRUCTION: str = "(press ctrl-d to exit)"
-
 
 def error_out(error_message: str) -> None:
     print(f"Error: {error_message}", file=sys.stderr)
@@ -53,7 +51,7 @@ def main() -> None:
 
     valid_letters: Set[str] = set(letters)
 
-    with open("/usr/share/dict/american-english") as word_file:
+    with open(WORD_LIST_PATH) as word_file:
         # Filter out all the words with symbols and uppercase letters, then save them
         valid_words: Set[str] = set(
             filter(
@@ -108,12 +106,17 @@ def main() -> None:
                 letter_arrangement[required_letter_index + 1 :],
                 curses.A_BOLD,
             )
-            # Exit instruction (bottom right)
-            stdscr.addstr(maxy - 1, maxx - 1 - len(EXIT_INSTRUCTION), EXIT_INSTRUCTION)
+            # Progress (bottom right)
+            progress_str = f"{len(words_found)}/{len(valid_words)} words found"
+            stdscr.addstr(maxy - 1, maxx - 1 - len(progress_str), progress_str)
 
         # Actually get a key.
         # This is a blocking action.
-        char: str = stdscr.getkey().lower()
+        # If they press ctrl-c, quit.
+        try:
+            char: str = stdscr.getkey().lower()
+        except KeyboardInterrupt:
+            break
 
         if char.isalpha():
             wip += char
@@ -137,6 +140,10 @@ def main() -> None:
         elif char == "\x04":  # Ctrl-D
             break
 
+    quit_curses()
+
+
+def quit_curses() -> None:
     curses.echo()
     curses.endwin()
 
