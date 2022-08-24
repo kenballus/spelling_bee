@@ -19,7 +19,7 @@ def error_out(error_message: str) -> None:
     sys.exit(1)
 
 
-def check_for_errors(pangram: str, required_letter: str) -> None:
+def check_for_errors(letters: str, required_letter: str) -> None:
     if not WORD_LIST_PATH.is_file():
         error_out(f"No word list found at {WORD_LIST_PATH_STR}.")
 
@@ -29,29 +29,29 @@ def check_for_errors(pangram: str, required_letter: str) -> None:
     if not required_letter.isalpha():
         error_out("The required letter is not a letter.")
 
-    if not pangram.isalpha():
-        error_out("The pangram contains non-letters.")
+    if not letters.isalpha():
+        error_out("The letters contains non-letters.")
 
-    if required_letter not in pangram:
-        error_out("The required letter is not in the pangram.")
+    if required_letter not in letters:
+        error_out("The required letter is not in the letters.")
 
 
 def main() -> None:
     parser: argparse.ArgumentParser = argparse.ArgumentParser(
         description="Clone of NYTimes Spelling Bee"
     )
-    parser.add_argument("--pangram", required=True)
+    parser.add_argument("--letters", required=True)
     parser.add_argument("--required_letter", metavar="LETTER", required=True)
 
     args: argparse.Namespace = parser.parse_args()
 
-    pangram: str = args.pangram.lower()
+    letters: str = args.letters.lower()
     required_letter: str = args.required_letter.lower()
 
     # This may exit the program
-    check_for_errors(pangram, required_letter)
+    check_for_errors(letters, required_letter)
 
-    valid_letters: Set[str] = set(pangram)
+    valid_letters: Set[str] = set(letters)
 
     with open("/usr/share/dict/american-english") as word_file:
         # Filter out all the words with symbols and uppercase letters, then save them
@@ -64,9 +64,6 @@ def main() -> None:
                 map(str.strip, word_file.readlines()),
             )
         )
-
-    # If you really want a fake word, I'm cool with it.
-    valid_words.add(pangram)
 
     stdscr = curses.initscr()
     curses.noecho()
@@ -127,7 +124,7 @@ def main() -> None:
                 words_found.append(wip)
                 words_found.sort()
                 score += 1 if len(wip) == MIN_WORD_LENGTH else len(wip)
-                if set(wip) == set(pangram):
+                if set(wip) == valid_letters:
                     score += 7
             wip = ""
         elif char == " ":
