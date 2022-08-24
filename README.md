@@ -1,4 +1,4 @@
 # spelling_bee
-CLI Clone of NYTimes Spelling Bee
+CLI clone of NYTimes Spelling Bee
 
 Requires python3 and words.
