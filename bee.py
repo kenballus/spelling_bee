@@ -63,6 +63,11 @@ def main() -> None:
             )
         )
 
+    if not any(set(w) == valid_letters for w in valid_words):
+        print("Warning: These letters have no pangram.")
+        print("Press enter to continue.")
+        input()
+
     stdscr = curses.initscr()
     curses.noecho()
     curses.curs_set(False)
